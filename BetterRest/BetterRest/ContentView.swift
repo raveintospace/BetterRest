@@ -29,9 +29,9 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             Form {
-                wakeUpSelector
-                amountOfSleepSelector
-                dailyCoffeeSelector
+                wakeUpSection
+                amountOfSleepSection
+                dailyCoffeeSection
             }
             .navigationTitle("BetterRest")
             .toolbar {
@@ -78,21 +78,15 @@ extension ContentView {
         showAlert = true
     }
 
-    private var wakeUpSelector: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text("When do you want to wake up?")
-                .font(.headline)
-
+    private var wakeUpSection: some View {
+        Section("When do you want to wake up?") {
             DatePicker("Please enter a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
                 .labelsHidden()
         }
     }
 
-    private var amountOfSleepSelector: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text("Desired amount of sleep")
-                .font(.headline)
-
+    private var amountOfSleepSection: some View {
+        Section("Desired amount of sleep") {
             Stepper("\(sleepAmount.formatted()) hours",
                     value: $sleepAmount,
                     in: 4...12,
@@ -100,11 +94,8 @@ extension ContentView {
         }
     }
 
-    private var dailyCoffeeSelector: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text("Daily coffee intake")
-                .font(.headline)
-
+    private var dailyCoffeeSection: some View {
+        Section("Daily coffee intake") {
             Stepper("^[\(coffeeAmount) cup](inflect: true)", value: $coffeeAmount, in: 1...20)
         }
     }
