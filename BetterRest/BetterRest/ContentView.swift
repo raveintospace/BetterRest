@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
 
-    @State private var wakeUp: Date = Date.now
+    @State private var wakeUp: Date = defaultWakeTime
     @State private var sleepAmount: Double = 8.0
     @State private var coffeeAmount: Int = 1
 
@@ -18,14 +18,21 @@ struct ContentView: View {
     @State private var alertMessage: String = ""
     @State private var showAlert: Bool = false
 
+    // Static so it can be used as wakeUp property value
+    static var defaultWakeTime: Date {
+        var components = DateComponents()
+        components.hour = 7
+        components.minute = 0
+        return Calendar.current.date(from: components) ?? .now
+    }
+
     var body: some View {
         NavigationStack {
-            VStack {
+            Form {
                 wakeUpSelector
                 amountOfSleepSelector
                 dailyCoffeeSelector
             }
-            .padding()
             .navigationTitle("BetterRest")
             .toolbar {
                 Button("Calculate", action: calculateBedTime)
@@ -72,7 +79,7 @@ extension ContentView {
     }
 
     private var wakeUpSelector: some View {
-        Group {
+        VStack(alignment: .leading, spacing: 0) {
             Text("When do you want to wake up?")
                 .font(.headline)
 
@@ -82,7 +89,7 @@ extension ContentView {
     }
 
     private var amountOfSleepSelector: some View {
-        Group {
+        VStack(alignment: .leading, spacing: 0) {
             Text("Desired amount of sleep")
                 .font(.headline)
 
@@ -94,11 +101,11 @@ extension ContentView {
     }
 
     private var dailyCoffeeSelector: some View {
-        Group {
+        VStack(alignment: .leading, spacing: 0) {
             Text("Daily coffee intake")
                 .font(.headline)
 
-            Stepper("\(coffeeAmount)", value: $coffeeAmount, in: 1...20)
+            Stepper("^[\(coffeeAmount) cup](inflect: true)", value: $coffeeAmount, in: 1...20)
         }
     }
 }
