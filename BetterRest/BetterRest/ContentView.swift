@@ -32,6 +32,7 @@ struct ContentView: View {
                 wakeUpSection
                 amountOfSleepSection
                 dailyCoffeeSection
+                alternativeDailyCoffeeSection
             }
             .navigationTitle("BetterRest")
             .toolbar {
@@ -96,7 +97,18 @@ extension ContentView {
 
     private var dailyCoffeeSection: some View {
         Section("Daily coffee intake") {
-            Stepper("^[\(coffeeAmount) cup](inflect: true)", value: $coffeeAmount, in: 1...20)
+            Stepper("^[\(coffeeAmount) cup](inflect: true)", value: $coffeeAmount, in: 0...20)
+        }
+    }
+
+    private var alternativeDailyCoffeeSection: some View {
+        Section("Daily coffee intake") {
+            Picker("^[\(coffeeAmount) cup](inflect: true)", selection: $coffeeAmount) {
+                ForEach(0..<21, id: \.self) {
+                    Text($0, format: .number)
+                }
+            }
+            .pickerStyle(.menu)
         }
     }
 }
