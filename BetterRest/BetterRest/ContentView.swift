@@ -26,6 +26,30 @@ struct ContentView: View {
         return Calendar.current.date(from: components) ?? .now
     }
 
+    // MARK: - Challenge 3
+    // The model is not recreated with each UI update
+    private let sleepModel: SleepCalculator = {
+        do {
+            let config = MLModelConfiguration()
+            return try SleepCalculator(configuration: config)
+        } catch {
+            fatalError("Unable to load the Sleep model")
+        }
+    }()
+
+    private var idealBedTime: String {
+        let components = Calendar.current.dateComponents([.hour, .minute], from: wakeUp)
+        let hour = (components.hour ?? 0) * 60 * 60
+        let minute = (components.minute ?? 0) * 60
+
+        guard let prediction = try? sleepModel.prediction(wake: Double(hour + minute),
+                                                          estimatedSleep: sleepAmount,
+                                                          coffee: Double(coffeeAmount))
+        else { return "Error" }
+
+        return (wakeUp - prediction.actualSleep).formatted(date: .omitted, time: .shortened)
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -80,27 +104,6 @@ extension ContentView {
         showAlert = true
     }
 
-    private func generateBedTimeString() -> String {
-        do {
-            let config = MLModelConfiguration()
-            let model = try SleepCalculator(configuration: config)
-
-            let components = Calendar.current.dateComponents([.hour, .minute], from: wakeUp)
-            let hour = (components.hour ?? 0) * 60 * 60 // convert to seconds
-            let minute = (components.minute ?? 0) * 60 // convert to seconds
-
-            // the sleep the user needs, computed by CoreML
-            let prediction = try model.prediction(wake: Double(hour + minute),
-                                                  estimatedSleep: sleepAmount,
-                                                  coffee: Double(coffeeAmount))
-
-            let sleepTime = wakeUp - prediction.actualSleep
-            return "\(sleepTime.formatted(date: .omitted, time: .shortened)) h"
-        } catch {
-            return "Sorry, there was a problem calculating your bedtime."
-        }
-    }
-
     private var wakeUpSection: some View {
         Section("When do you want to wake up?") {
             DatePicker("Please enter a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
@@ -136,7 +139,7 @@ extension ContentView {
 
     private var idealBedtimeSection: some View {
         Section("Your ideal bedtime is...") {
-            Text(generateBedTimeString())
+            Text(idealBedTime)
                 .font(.title3)
         }
     }
